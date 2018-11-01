@@ -1,0 +1,33 @@
+#!/bin/bash
+# Modified by Victor W. Torres
+# Original from Jonathan Allen
+
+ssh_timeout=10
+
+pcfirst=1
+pclast=30
+
+# PID and Load are neccessary here to get the row headers,
+# everything else are the program names to search for
+grep_cmd="grep 'PID\|load\|a\.out\|tmin\|ptrap\|p3'"
+
+if [[ $1 -eq 244 || $1 -eq 251 ]]; then
+
+    if [ $# -eq 3 ]; then
+        pcfirst=$2
+        pclast=$3
+    fi
+
+    for i in `seq -f "%02g" $pcfirst $pclast`;
+    do
+        echo -ne "PC " $i" "
+        ssh -q -o ConnectTimeout=$ssh_timeout o$1-$i " top -bn1 | "$grep_cmd 
+        echo '*'
+    done 
+
+else
+    echo "usage: load lab# first_pc last_pc (first and last pc are optional)"
+    echo "ex: load 244 8 16"
+    echo "ex: load 251"
+    exit
+fi
